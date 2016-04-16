@@ -11,7 +11,6 @@ import java.io.*;
  */
 
 public class PlaceRegistry extends JFrame{
-    private ImageIcon map;
 
     String[] typesOfPlaces = {"Described place", "Named place"};
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
@@ -96,31 +95,34 @@ public class PlaceRegistry extends JFrame{
     class NewPlaceListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
             String chosenTypeOfPlace = (String) chooseTypeOfPlace.getSelectedItem();
-
+            //TODO add so that the user can choose a place on the map by clicking on it
+            //TODO change the cursor to a cross when the user has to choose a place
             if (chosenTypeOfPlace.equalsIgnoreCase("Named place")) {
                 NamedPlaceForm n = new NamedPlaceForm();
                 int answer = JOptionPane.showConfirmDialog(PlaceRegistry.this, n, "Create new named place",
                         JOptionPane.OK_CANCEL_OPTION);
-
                 if (answer != JOptionPane.OK_OPTION) {
                     return;
                 }
-
                 String name = n.getName();
                 NamedPlace namedPlace = new NamedPlace(name);
+                //TODO add to some sort of data structure that isn't an array
+                //TODO implement the triangle on the map
+                //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
 
             } else if (chosenTypeOfPlace.equalsIgnoreCase("Described place")) {
                 DescribedPlaceForm d = new DescribedPlaceForm();
                 int answer = JOptionPane.showConfirmDialog(PlaceRegistry.this, d, "Create new described place",
                         JOptionPane.OK_CANCEL_OPTION);
-
                 if (answer != JOptionPane.OK_OPTION) {
                     return;
                 }
-
                 String name = d.getName();
                 String description = d.getDescription();
                 DescribedPlace describedPlace = new DescribedPlace(name, description);
+                //TODO add to some sort of data structure that isn't an array
+                //TODO implement the triangle on the map
+                //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
             }
         }
     }
