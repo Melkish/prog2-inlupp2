@@ -11,6 +11,7 @@ import java.io.*;
  */
 
 public class PlaceRegistry extends JFrame{
+    private ImageIcon map;
 
     String[] typesOfPlaces = {"Described place", "Named place"};
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
@@ -25,8 +26,10 @@ public class PlaceRegistry extends JFrame{
         setJMenuBar(menuBar);
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
+
         JMenuItem newMapItem = new JMenuItem("Open New Map");
         fileMenu.add(newMapItem);
+        //TODO newMapItem.addActionListener(new OpenMapListener());
 
         JMenuItem loadPlacesItem = new JMenuItem("Load places");
         fileMenu.add(loadPlacesItem);
@@ -44,7 +47,7 @@ public class PlaceRegistry extends JFrame{
         JLabel newLabel = new JLabel("New: ");
         upper.add(newLabel);
         upper.add(chooseTypeOfPlace);
-        //TODO chooseTypeOfPlace.addActionListener();
+        chooseTypeOfPlace.addActionListener(new NewPlaceListener());
 
         JTextField searchField = new JTextField(10);
         upper.add(searchField);
@@ -83,9 +86,62 @@ public class PlaceRegistry extends JFrame{
         middle.setBackground(myBlue);
 
 
+
         setSize(600, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setVisible(true);
     }
+
+    class NewPlaceListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            String chosenTypeOfPlace = (String) chooseTypeOfPlace.getSelectedItem();
+
+            if (chosenTypeOfPlace.equalsIgnoreCase("Named place")) {
+                NamedPlaceForm n = new NamedPlaceForm();
+                int answer = JOptionPane.showConfirmDialog(PlaceRegistry.this, n, "Create new named place",
+                        JOptionPane.OK_CANCEL_OPTION);
+
+                if (answer != JOptionPane.OK_OPTION) {
+                    return;
+                }
+
+                String name = n.getName();
+                NamedPlace namedPlace = new NamedPlace(name);
+
+            } else if (chosenTypeOfPlace.equalsIgnoreCase("Described place")) {
+                DescribedPlaceForm d = new DescribedPlaceForm();
+                int answer = JOptionPane.showConfirmDialog(PlaceRegistry.this, d, "Create new described place",
+                        JOptionPane.OK_CANCEL_OPTION);
+
+                if (answer != JOptionPane.OK_OPTION) {
+                    return;
+                }
+
+                String name = d.getName();
+                String description = d.getDescription();
+                DescribedPlace describedPlace = new DescribedPlace(name, description);
+            }
+        }
+    }
+
+    /* class Show extends JFrame {
+        JFileChooser jfc = new JFileChooser(".");
+
+        Show() {
+            super("");
+
+            FileFilter fileFilter = new FileNameExtensionFilter("jpg", "gif", "png");
+            new OpenMapListener();
+
+        }
+
+    }
+
+    class OpenMapListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            JFileChooser jfc = new JFileChooser(".");
+            int answer = jfc.showDialog(Show.this);
+        }
+    } */
 }
