@@ -10,17 +10,27 @@ import java.io.*;
  * Created by Melke on 16/04/16.
  */
 
-public class PlaceRegistry extends JFrame{
+public class PlaceRegistry extends JFrame {
+
+    public HashMap<String, Place> placesMap = new HashMap<>();
 
     String[] typesOfPlaces = {"Described place", "Named place"};
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
     Color myBlue = new Color(174, 218, 232);
+    JFileChooser jfc = new JFileChooser(".");
+    MapPanel mp = null;
+
 
     public static void main(String[] args) {
         new PlaceRegistry();
     }
 
     public PlaceRegistry() {
+        super("My awesomely cool place registry");
+
+        FileFilter fileFilter = new FileNameExtensionFilter("jpg", "gif", "png");
+        jfc.setFileFilter(fileFilter);
+
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
         JMenu fileMenu = new JMenu("File");
@@ -28,7 +38,7 @@ public class PlaceRegistry extends JFrame{
 
         JMenuItem newMapItem = new JMenuItem("Open New Map");
         fileMenu.add(newMapItem);
-        //TODO newMapItem.addActionListener(new OpenMapListener());
+        newMapItem.addActionListener(new OpenMapListener());
 
         JMenuItem loadPlacesItem = new JMenuItem("Load places");
         fileMenu.add(loadPlacesItem);
@@ -85,7 +95,6 @@ public class PlaceRegistry extends JFrame{
         middle.setBackground(myBlue);
 
 
-
         setSize(600, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -106,7 +115,8 @@ public class PlaceRegistry extends JFrame{
                 }
                 String name = n.getName();
                 NamedPlace namedPlace = new NamedPlace(name);
-                //TODO add to some sort of data structure that isn't an array
+                placesMap.put(name ,namedPlace);
+
                 //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
 
@@ -120,30 +130,40 @@ public class PlaceRegistry extends JFrame{
                 String name = d.getName();
                 String description = d.getDescription();
                 DescribedPlace describedPlace = new DescribedPlace(name, description);
-                //TODO add to some sort of data structure that isn't an array
+                placesMap.put(name, describedPlace);
+
                 //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
             }
         }
     }
 
-    /* class Show extends JFrame {
-        JFileChooser jfc = new JFileChooser(".");
 
-        Show() {
-            super("");
+    public class MapPanel extends JPanel {
+        private ImageIcon map;
 
-            FileFilter fileFilter = new FileNameExtensionFilter("jpg", "gif", "png");
-            new OpenMapListener();
-
+        public MapPanel(String fileName) {
+            map = new ImageIcon(fileName);
+            int w = map.getIconWidth();
+            int h = map.getIconHeight();
+            setPreferredSize(new Dimension(w, h));
         }
-
     }
 
-    class OpenMapListener implements ActionListener {
-        public void actionPerformed(ActionEvent ave) {
-            JFileChooser jfc = new JFileChooser(".");
-            int answer = jfc.showDialog(Show.this);
+
+        public class OpenMapListener implements ActionListener {
+            public void actionPerformed(ActionEvent ave) {
+                JFileChooser jfc = new JFileChooser(".");
+                int answer = jfc.showOpenDialog(PlaceRegistry.this);
+                if (answer != JFileChooser.APPROVE_OPTION) {
+                    return;
+                }
+                File file = jfc.getSelectedFile();
+                String fileName = file.getAbsolutePath();
+                mp = new MapPanel(fileName);
+                pack();
+                validate();
+                repaint();
         }
-    } */
+    }
 }
