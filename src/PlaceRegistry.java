@@ -19,6 +19,7 @@ public class PlaceRegistry extends JFrame {
     Color myBlue = new Color(174, 218, 232);
     JFileChooser jfc = new JFileChooser(".");
     MapPanel mp = null;
+    JScrollPane scroll = null;
 
 
     public static void main(String[] args) {
@@ -93,6 +94,10 @@ public class PlaceRegistry extends JFrame {
         JPanel middle = new JPanel();
         add(middle, BorderLayout.CENTER);
         middle.setBackground(myBlue);
+        if (scroll != null) {
+            middle.add(scroll);
+            repaint();
+        }
 
 
         setSize(600, 400);
@@ -100,6 +105,8 @@ public class PlaceRegistry extends JFrame {
 
         setVisible(true);
     }
+
+
 
     class NewPlaceListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
@@ -148,6 +155,10 @@ public class PlaceRegistry extends JFrame {
             int h = map.getIconHeight();
             setPreferredSize(new Dimension(w, h));
         }
+        protected void paintComponent(Graphics g){
+            super.paintComponent(g);
+            g.drawImage(map.getImage(), 0, 0, this);
+        }
     }
 
 
@@ -161,6 +172,8 @@ public class PlaceRegistry extends JFrame {
                 File file = jfc.getSelectedFile();
                 String fileName = file.getAbsolutePath();
                 mp = new MapPanel(fileName);
+                scroll = new JScrollPane(mp);
+                add(scroll);
                 pack();
                 validate();
                 repaint();
