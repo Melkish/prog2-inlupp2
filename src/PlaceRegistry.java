@@ -13,13 +13,15 @@ import java.io.*;
 public class PlaceRegistry extends JFrame {
 
     public HashMap<String, Place> placesMap = new HashMap<>();
-
+    JPanel middle = new JPanel();
     String[] typesOfPlaces = {"Described place", "Named place"};
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
     Color myBlue = new Color(174, 218, 232);
     JFileChooser jfc = new JFileChooser(".");
     MapPanel mp = null;
-    JScrollPane scroll = null;
+    JTextField searchField = new JTextField(10);
+    MouseListener mouseListener = new MouseListener();
+
 
 
     public static void main(String[] args) {
@@ -59,11 +61,11 @@ public class PlaceRegistry extends JFrame {
         upper.add(chooseTypeOfPlace);
         chooseTypeOfPlace.addActionListener(new NewPlaceListener());
 
-        JTextField searchField = new JTextField(10);
+        searchField = new JTextField(10);
         upper.add(searchField);
         JButton searchButton = new JButton("Search");
         upper.add(searchButton);
-        //TODO searchButton.addActionListener();
+        searchButton.addActionListener(new SearchListener());
 
         JButton hideButton = new JButton("Hide");
         upper.add(hideButton);
@@ -91,13 +93,10 @@ public class PlaceRegistry extends JFrame {
         right.add(hideCategoriesButton);
         //TODO fix so that you can choose a category in the list and add actionListeners
 
-        JPanel middle = new JPanel();
+        middle = new JPanel();
         add(middle, BorderLayout.CENTER);
         middle.setBackground(myBlue);
-        if (scroll != null) {
-            middle.add(scroll);
-            repaint();
-        }
+
 
 
         setSize(600, 400);
@@ -110,9 +109,22 @@ public class PlaceRegistry extends JFrame {
 
     class NewPlaceListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
+            mp.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+            mp.addMouseListener(mouseListener);
+        }
+    }
+
+    public class MouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent mev) {
+            int x = mev.getX();
+            int y = mev.getY();
+            mp.validate();
+            mp.repaint();
+            mp.removeMouseListener(mouseListener);
+            mp.setCursor(Cursor.getDefaultCursor());
+
             String chosenTypeOfPlace = (String) chooseTypeOfPlace.getSelectedItem();
-            //TODO add so that the user can choose a place on the map by clicking on it
-            //TODO change the cursor to a cross when the user has to choose a place
             if (chosenTypeOfPlace.equalsIgnoreCase("Named place")) {
                 NamedPlaceForm n = new NamedPlaceForm();
                 int answer = JOptionPane.showConfirmDialog(PlaceRegistry.this, n, "Create new named place",
@@ -121,7 +133,7 @@ public class PlaceRegistry extends JFrame {
                     return;
                 }
                 String name = n.getName();
-                NamedPlace namedPlace = new NamedPlace(name);
+                NamedPlace namedPlace = new NamedPlace(name, x, y);
                 placesMap.put(name ,namedPlace);
 
                 //TODO implement the triangle on the map
@@ -136,12 +148,20 @@ public class PlaceRegistry extends JFrame {
                 }
                 String name = d.getName();
                 String description = d.getDescription();
-                DescribedPlace describedPlace = new DescribedPlace(name, description);
+                DescribedPlace describedPlace = new DescribedPlace(name, x, y, description);
                 placesMap.put(name, describedPlace);
 
                 //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
             }
+        }
+    }
+
+    public class SearchListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            String searchInput = searchField.getText();
+            placesMap.get(searchInput);
+            //TODO display the object
         }
     }
 
@@ -172,8 +192,9 @@ public class PlaceRegistry extends JFrame {
                 File file = jfc.getSelectedFile();
                 String fileName = file.getAbsolutePath();
                 mp = new MapPanel(fileName);
-                scroll = new JScrollPane(mp);
-                add(scroll);
+                JScrollPane scroll = new JScrollPane(mp);
+                scroll.getViewport().setPreferredSize(new Dimension(650, 450));
+                middle.add(scroll);
                 pack();
                 validate();
                 repaint();

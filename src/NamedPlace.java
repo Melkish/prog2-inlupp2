@@ -3,7 +3,7 @@
  */
 public class NamedPlace extends Place {
 
-    public NamedPlace(String name) {
-        super(name);
+    public NamedPlace(String name, int x, int y) {
+        super(name, x, y);
     }
 }
