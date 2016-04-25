@@ -5,8 +5,8 @@ public class DescribedPlace extends Place {
 
     String description;
 
-    public DescribedPlace(String name, int x, int y, String description){
-        super(name, x, y);
+    public DescribedPlace(String name, Position p, String description){
+        super(name, p);
         this.description = description;
     }
 

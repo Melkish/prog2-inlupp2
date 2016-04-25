@@ -12,9 +12,11 @@ import java.io.*;
 
 public class PlaceRegistry extends JFrame {
 
-    public HashMap<String, Place> placesMap = new HashMap<>();
-    JPanel middle = new JPanel();
+    public HashMap<String, Place> placesByName = new HashMap<>();
+    public HashMap<Position, Place> placesByPosition = new HashMap<>();
+    public HashMap<String, Place> placesByCategories = new HashMap<>();
     String[] typesOfPlaces = {"Described place", "Named place"};
+    String[] typesOfCategories = {"Bus", "Subway", "Train"};
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
     Color myBlue = new Color(174, 218, 232);
     JFileChooser jfc = new JFileChooser(".");
@@ -69,15 +71,15 @@ public class PlaceRegistry extends JFrame {
 
         JButton hideButton = new JButton("Hide");
         upper.add(hideButton);
-        //TODO hideButton.addActionListener();
+        hideButton.addActionListener(new HideListener());
 
         JButton removeButton = new JButton("Remove");
         upper.add(removeButton);
-        //TODO removeButton.addActionListener();
+        removeButton.addActionListener(new RemoveListener());
 
         JButton whatIsHereButton = new JButton("What is here?");
         upper.add(whatIsHereButton);
-        //TODO whatIsHereButton.addActionListener();
+        whatIsHereButton.addActionListener(new WhatIsHereListener());
 
         JPanel right = new JPanel();
         add(right, BorderLayout.EAST);
@@ -93,19 +95,11 @@ public class PlaceRegistry extends JFrame {
         right.add(hideCategoriesButton);
         //TODO fix so that you can choose a category in the list and add actionListeners
 
-        middle = new JPanel();
-        add(middle, BorderLayout.CENTER);
-        middle.setBackground(myBlue);
-
-
-
         setSize(600, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setVisible(true);
     }
-
-
 
     class NewPlaceListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
@@ -133,8 +127,11 @@ public class PlaceRegistry extends JFrame {
                     return;
                 }
                 String name = n.getName();
-                NamedPlace namedPlace = new NamedPlace(name, x, y);
-                placesMap.put(name ,namedPlace);
+                Position p = new Position(x, y);
+                NamedPlace namedPlace = new NamedPlace(name, p);
+                placesByName.put(name ,namedPlace);
+                placesByPosition.put(p, namedPlace);
+                repaint();
 
                 //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
@@ -148,8 +145,11 @@ public class PlaceRegistry extends JFrame {
                 }
                 String name = d.getName();
                 String description = d.getDescription();
-                DescribedPlace describedPlace = new DescribedPlace(name, x, y, description);
-                placesMap.put(name, describedPlace);
+                Position p = new Position(x, y);
+                DescribedPlace describedPlace = new DescribedPlace(name, p, description);
+                placesByName.put(name, describedPlace);
+                placesByPosition.put(p, describedPlace);
+                repaint();
 
                 //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
@@ -157,10 +157,32 @@ public class PlaceRegistry extends JFrame {
         }
     }
 
+    public class RemoveListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            //placesByName.remove();
+            //placesByPosition.remove();
+            //placesByCategories.remove();
+            //TODO add functionality to remove an object
+        }
+    }
+
+    public class HideListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            //TODO add functionality to hide an object
+        }
+    }
+
+    public class WhatIsHereListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            //TODO add functionality to show the object at the position
+            //placesByPosition.get();
+        }
+    }
+
     public class SearchListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
             String searchInput = searchField.getText();
-            placesMap.get(searchInput);
+            placesByName.get(searchInput);
             //TODO display the object
         }
     }
@@ -178,7 +200,15 @@ public class PlaceRegistry extends JFrame {
         protected void paintComponent(Graphics g){
             super.paintComponent(g);
             g.drawImage(map.getImage(), 0, 0, this);
+            for (Position p : placesByPosition.keySet()) {
+                Place place = placesByPosition.get(p);
+                //TODO implement categories
+                g.setColor(Color.BLACK);
+                Polygon t = new Polygon(new int[]{p.getX(), p.getX()-15, p.getX()+15}, new int[]{p.getY(), p.getY()-25, p.getY()-25}, 3);
+                g.fillPolygon(t);
+            }
         }
+
     }
 
 
@@ -193,8 +223,7 @@ public class PlaceRegistry extends JFrame {
                 String fileName = file.getAbsolutePath();
                 mp = new MapPanel(fileName);
                 JScrollPane scroll = new JScrollPane(mp);
-                scroll.getViewport().setPreferredSize(new Dimension(650, 450));
-                middle.add(scroll);
+                add(scroll, BorderLayout.CENTER);
                 pack();
                 validate();
                 repaint();
