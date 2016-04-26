@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by Melke on 16/04/16.
  */
-public class DescribedPlace extends Place {
+public class DescribedPlace extends Place implements Serializable{
 
     String description;
 
@@ -10,7 +12,7 @@ public class DescribedPlace extends Place {
         this.description = description;
     }
 
-    public String getDescription() {
-        return this.description;
+    public String toString() {
+        return super.getName() + "\n" + description;
     }
 }

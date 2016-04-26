@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by Melke on 16/04/16.
  */
-public class Position {
+public class Position implements Serializable{
     private int x;
     private int y;
 
@@ -18,6 +20,13 @@ public class Position {
         return y;
     }
 
-    //TODO make this class be able ti identify  places from a certain position
-    //TODO this class has to be able to work as keys in a hash map
+    public boolean intersectsWith(int clickedX, int clickedY) {
+    if(clickedX > x-15 && clickedX < x+15 && clickedY < y && clickedY > y-25) {
+        System.out.println("intersects with returns true");
+        return true;
+    } else {
+        System.out.println("intersects with returns false");
+        return false;
+    }
+    }
 }

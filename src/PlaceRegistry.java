@@ -5,8 +5,7 @@ import javax.swing.*;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
 import java.io.*;
-
-/**
+/*
  * Created by Melke on 16/04/16.
  */
 
@@ -17,12 +16,14 @@ public class PlaceRegistry extends JFrame {
     public HashMap<String, Place> placesByCategories = new HashMap<>();
     String[] typesOfPlaces = {"Described place", "Named place"};
     String[] typesOfCategories = {"Bus", "Subway", "Train"};
+    Place lastSelectedPlace;
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
     Color myBlue = new Color(174, 218, 232);
     JFileChooser jfc = new JFileChooser(".");
     MapPanel mp = null;
     JTextField searchField = new JTextField(10);
-    MouseListener mouseListener = new MouseListener();
+    MouseListener mouseAddListener = new MouseAddListener();
+    MouseListener mapMouseListener = new MapMouseListener();
 
 
 
@@ -101,21 +102,39 @@ public class PlaceRegistry extends JFrame {
         setVisible(true);
     }
 
-    class NewPlaceListener implements ActionListener {
-        public void actionPerformed(ActionEvent ave) {
-            mp.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-            mp.addMouseListener(mouseListener);
+    public class MapMouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent mev) {
+            int x =  mev.getX();
+            int y = mev.getY();
+            for (Position p : placesByPosition.keySet()){
+                boolean intersects = p.intersectsWith(x,y);
+                if (intersects == true) {
+                    Place place = placesByPosition.get(p);
+                    lastSelectedPlace = place;
+                }
+            }
+            mp.validate();
+            mp.repaint();
         }
     }
 
-    public class MouseListener extends MouseAdapter {
+
+    class NewPlaceListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            mp.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+            mp.addMouseListener(mouseAddListener);
+        }
+    }
+
+    public class MouseAddListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent mev) {
             int x = mev.getX();
             int y = mev.getY();
             mp.validate();
             mp.repaint();
-            mp.removeMouseListener(mouseListener);
+            mp.removeMouseListener(mouseAddListener);
             mp.setCursor(Cursor.getDefaultCursor());
 
             String chosenTypeOfPlace = (String) chooseTypeOfPlace.getSelectedItem();
@@ -133,7 +152,6 @@ public class PlaceRegistry extends JFrame {
                 placesByPosition.put(p, namedPlace);
                 repaint();
 
-                //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
 
             } else if (chosenTypeOfPlace.equalsIgnoreCase("Described place")) {
@@ -151,7 +169,6 @@ public class PlaceRegistry extends JFrame {
                 placesByPosition.put(p, describedPlace);
                 repaint();
 
-                //TODO implement the triangle on the map
                 //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
             }
         }
@@ -159,31 +176,33 @@ public class PlaceRegistry extends JFrame {
 
     public class RemoveListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
-            //placesByName.remove();
-            //placesByPosition.remove();
-            //placesByCategories.remove();
-            //TODO add functionality to remove an object
+            placesByName.remove(lastSelectedPlace);
+            placesByPosition.remove(lastSelectedPlace);
+            placesByCategories.remove(lastSelectedPlace);
+            repaint();
         }
     }
 
     public class HideListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
-            //TODO add functionality to hide an object
+            lastSelectedPlace.hideHidden();
+            repaint();
         }
     }
 
     public class WhatIsHereListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
-            //TODO add functionality to show the object at the position
-            //placesByPosition.get();
+            lastSelectedPlace.showHidden();
+            repaint();
         }
     }
 
     public class SearchListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
             String searchInput = searchField.getText();
-            placesByName.get(searchInput);
-            //TODO display the object
+            Place place = placesByName.get(searchInput);
+            lastSelectedPlace = place;
+            repaint();
         }
     }
 
@@ -197,19 +216,29 @@ public class PlaceRegistry extends JFrame {
             int h = map.getIconHeight();
             setPreferredSize(new Dimension(w, h));
         }
-        protected void paintComponent(Graphics g){
+
+        protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             g.drawImage(map.getImage(), 0, 0, this);
             for (Position p : placesByPosition.keySet()) {
                 Place place = placesByPosition.get(p);
+                if (place.getHidden() == true){
+                    return;
+                }
                 //TODO implement categories
                 g.setColor(Color.BLACK);
-                Polygon t = new Polygon(new int[]{p.getX(), p.getX()-15, p.getX()+15}, new int[]{p.getY(), p.getY()-25, p.getY()-25}, 3);
+                Polygon t = new Polygon(new int[]{p.getX(), p.getX() - 15, p.getX() + 15}, new int[]{p.getY(), p.getY() - 25, p.getY() - 25}, 3);
                 g.fillPolygon(t);
+                if (place == lastSelectedPlace) {
+                    g.setColor(Color.WHITE);
+                    g.fillRect(p.getX(), p.getY(), 150, 50);
+                    g.setColor(Color.BLACK);
+                    g.drawString(place.toString(), p.getX() + 5, p.getY() + 15);
+                }
             }
         }
 
-    }
+        }
 
 
         public class OpenMapListener implements ActionListener {
@@ -224,9 +253,11 @@ public class PlaceRegistry extends JFrame {
                 mp = new MapPanel(fileName);
                 JScrollPane scroll = new JScrollPane(mp);
                 add(scroll, BorderLayout.CENTER);
+                mp.addMouseListener(mapMouseListener);
                 pack();
                 validate();
                 repaint();
+            }
         }
     }
-}
+
