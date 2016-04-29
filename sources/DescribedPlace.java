@@ -5,7 +5,8 @@ import java.io.Serializable;
  */
 public class DescribedPlace extends Place implements Serializable{
 
-    String description;
+    private String description;
+    private String type = "described";
 
     public DescribedPlace(String name, Position p, String description, String category){
         super(name, p, category);
@@ -14,5 +15,13 @@ public class DescribedPlace extends Place implements Serializable{
 
     public String toString() {
         return super.getName() + "\n" + description;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public String getType() {
+        return this.type;
     }
 }

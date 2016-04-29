@@ -13,7 +13,6 @@ public class PlaceRegistry extends JFrame {
 
     public HashMap<String, Place> placesByName = new HashMap<>();
     public HashMap<Position, Place> placesByPosition = new HashMap<>();
-    public HashMap<String, Place> placesByCategories = new HashMap<>();
     String[] typesOfPlaces = {"Described place", "Named place"};
     String[] typesOfCategories = {"Bus", "Subway", "Train", ""};
     JList<String> categoryList = new JList<>(typesOfCategories);
@@ -49,12 +48,15 @@ public class PlaceRegistry extends JFrame {
 
         JMenuItem loadPlacesItem = new JMenuItem("Load places");
         fileMenu.add(loadPlacesItem);
+        loadPlacesItem.addActionListener(new OpenListener());
 
         JMenuItem saveItem = new JMenuItem("Save");
         fileMenu.add(saveItem);
+        saveItem.addActionListener(new SaveListener());
 
         JMenuItem exitItem = new JMenuItem("Exit");
         fileMenu.add(exitItem);
+
 
         JPanel upper = new JPanel();
         add(upper, BorderLayout.NORTH);
@@ -192,7 +194,6 @@ public class PlaceRegistry extends JFrame {
         public void actionPerformed(ActionEvent ave) {
             placesByName.remove(lastSelectedPlace);
             placesByPosition.remove(lastSelectedPlace);
-            placesByCategories.remove(lastSelectedPlace);
             repaint();
         }
     }
@@ -241,14 +242,14 @@ public class PlaceRegistry extends JFrame {
                 }
                 String category = place.getCategory();
                 Color triangleColor;
-                if(category.equalsIgnoreCase("subway")) {
-                    triangleColor = Color.BLUE;
+                if(category == null) {
+                    triangleColor = Color.BLACK;
                 } else if (category.equalsIgnoreCase("bus")) {
                     triangleColor = Color.RED;
                 } else if (category.equalsIgnoreCase("train")) {
                     triangleColor = Color.GREEN;
-                } else if (category == null) {
-                    triangleColor = Color.BLACK;
+                } else if (category.equalsIgnoreCase("subway")) {
+                    triangleColor = Color.BLUE;
                 } else {
                     triangleColor = Color.BLACK;
                 }
@@ -283,6 +284,73 @@ public class PlaceRegistry extends JFrame {
                 pack();
                 validate();
                 repaint();
+            }
+        }
+
+        public class SaveListener implements ActionListener {
+            public void actionPerformed(ActionEvent ave) {
+                try{
+                    FileWriter saveFile = new FileWriter("place.reg");
+                         PrintWriter out = new PrintWriter(saveFile);
+                         for(String s : placesByName.keySet()) {
+                             Place p = placesByName.get(s);
+                             Position position = p.getPosition();
+                             int x = position.getX();
+                             int y = position.getY();
+                             if (p instanceof NamedPlace && p.getCategory() != null)
+                                out.println(((NamedPlace) p).getType() + "," + p.getName() + "," + x + "," + y + "," + p.getCategory());
+                             else if (p instanceof NamedPlace && p.getCategory() == null)
+                                 out.println(((NamedPlace) p).getType() + "," + p.getName() + ","  + "," + x + "," + y + ",");
+                             else if (p instanceof DescribedPlace && p.getCategory() != null)
+                                 out.println(((DescribedPlace) p).getType() + "," + p.getName() + "," + ((DescribedPlace) p).getDescription()+ ","  + "," + x + "," + y + ","  + p.getCategory());
+                             else if (p instanceof DescribedPlace && p.getCategory() == null)
+                                 out.println(((DescribedPlace) p).getType() + "," + p.getName() + "," + ((DescribedPlace) p).getDescription()+ ","  + "," + x + "," + y + ",");
+                             saveFile.close();
+                         }
+                 }catch(IOException e){
+                    JOptionPane.showMessageDialog(PlaceRegistry.this,"Error");
+            }
+            }
+        }
+        public class OpenListener implements ActionListener {
+            public void actionPerformed(ActionEvent ave) {
+                try{
+                    FileReader in = new FileReader("place.reg");
+                    BufferedReader br = new BufferedReader(in);
+                    String line;
+                    while ((line=br.readLine()) != null) {
+                        String[] tokens = line.split(",");
+                        if (tokens[0].equalsIgnoreCase("named")) {
+                            String name = tokens[1];
+                            int x = Integer.parseInt(tokens[2]);
+                            int y = Integer.parseInt(tokens[3]);
+                            String description = tokens[3];
+                            String category = tokens[4];
+
+                        Position position = new Position(x,y);
+                        DescribedPlace p = new DescribedPlace(name, position, description, category);
+                        placesByName.put(name, p);
+                        placesByPosition.put(position, p);
+                        }
+                        else {
+                            String name = tokens[1];
+                            int x = Integer.parseInt(tokens[2]);
+                            int y = Integer.parseInt(tokens[3]);
+                            String category = tokens[3];
+
+                            Position position = new Position(x,y);
+                            NamedPlace p = new NamedPlace(name, position, category);
+                            placesByName.put(name, p);
+                            placesByPosition.put(position, p);
+                        }
+                    }
+                    br.close();
+                    in.close();
+                }catch(FileNotFoundException e){
+                    JOptionPane.showMessageDialog(PlaceRegistry.this,"Error");
+                }catch(IOException e){
+                    JOptionPane.showMessageDialog(PlaceRegistry.this,"Error");
+                }
             }
         }
     }
