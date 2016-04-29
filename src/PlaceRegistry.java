@@ -15,7 +15,8 @@ public class PlaceRegistry extends JFrame {
     public HashMap<Position, Place> placesByPosition = new HashMap<>();
     public HashMap<String, Place> placesByCategories = new HashMap<>();
     String[] typesOfPlaces = {"Described place", "Named place"};
-    String[] typesOfCategories = {"Bus", "Subway", "Train"};
+    String[] typesOfCategories = {"Bus", "Subway", "Train", ""};
+    JList<String> categoryList = new JList<>(typesOfCategories);
     Place lastSelectedPlace;
     private JComboBox<String> chooseTypeOfPlace = new JComboBox<>(typesOfPlaces);
     Color myBlue = new Color(174, 218, 232);
@@ -89,12 +90,16 @@ public class PlaceRegistry extends JFrame {
         right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
         JLabel categoriesLabel = new JLabel("Categories");
         right.add(categoriesLabel);
-        JTextArea categoriesTextArea = new JTextArea("Bus" + "\n" + "Subway" + "\n" + "Train");
-        right.add(categoriesTextArea);
-        categoriesTextArea.setEditable(false);
+        categoryList.setVisibleRowCount(5);
+        categoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane listScroll = new JScrollPane(categoryList);
+        Dimension d = categoryList.getPreferredSize();
+        d.width = 120;
+        listScroll.setPreferredSize(d);
+        right.add(listScroll);
         JButton hideCategoriesButton = new JButton("Hide Categories");
         right.add(hideCategoriesButton);
-        //TODO fix so that you can choose a category in the list and add actionListeners
+        hideCategoriesButton.addActionListener(new HideCategoriesListener());
 
         setSize(600, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -119,6 +124,17 @@ public class PlaceRegistry extends JFrame {
         }
     }
 
+    class HideCategoriesListener implements ActionListener {
+        public void actionPerformed(ActionEvent ave) {
+            String category = categoryList.getSelectedValue();
+            for(String s : placesByName.keySet()) {
+                Place p = placesByName.get(s);
+                if (category.equalsIgnoreCase(p.getCategory())) {
+                    p.hideHidden();
+                }
+            }
+        }
+    }
 
     class NewPlaceListener implements ActionListener {
         public void actionPerformed(ActionEvent ave) {
@@ -147,12 +163,11 @@ public class PlaceRegistry extends JFrame {
                 }
                 String name = n.getName();
                 Position p = new Position(x, y);
-                NamedPlace namedPlace = new NamedPlace(name, p);
+                String category = categoryList.getSelectedValue();
+                NamedPlace namedPlace = new NamedPlace(name, p, category);
                 placesByName.put(name ,namedPlace);
                 placesByPosition.put(p, namedPlace);
                 repaint();
-
-                //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
 
             } else if (chosenTypeOfPlace.equalsIgnoreCase("Described place")) {
                 DescribedPlaceForm d = new DescribedPlaceForm();
@@ -164,12 +179,11 @@ public class PlaceRegistry extends JFrame {
                 String name = d.getName();
                 String description = d.getDescription();
                 Position p = new Position(x, y);
-                DescribedPlace describedPlace = new DescribedPlace(name, p, description);
+                String category = categoryList.getSelectedValue();
+                DescribedPlace describedPlace = new DescribedPlace(name, p, description, category);
                 placesByName.put(name, describedPlace);
                 placesByPosition.put(p, describedPlace);
                 repaint();
-
-                //TODO bus = Color.RED, subway = Color.BLUE, train = Color.GREEN, others = Color.Black
             }
         }
     }
@@ -225,8 +239,20 @@ public class PlaceRegistry extends JFrame {
                 if (place.getHidden() == true){
                     return;
                 }
-                //TODO implement categories
-                g.setColor(Color.BLACK);
+                String category = place.getCategory();
+                Color triangleColor;
+                if(category.equalsIgnoreCase("subway")) {
+                    triangleColor = Color.BLUE;
+                } else if (category.equalsIgnoreCase("bus")) {
+                    triangleColor = Color.RED;
+                } else if (category.equalsIgnoreCase("train")) {
+                    triangleColor = Color.GREEN;
+                } else if (category == null) {
+                    triangleColor = Color.BLACK;
+                } else {
+                    triangleColor = Color.BLACK;
+                }
+                g.setColor(triangleColor);
                 Polygon t = new Polygon(new int[]{p.getX(), p.getX() - 15, p.getX() + 15}, new int[]{p.getY(), p.getY() - 25, p.getY() - 25}, 3);
                 g.fillPolygon(t);
                 if (place == lastSelectedPlace) {

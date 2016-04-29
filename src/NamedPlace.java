@@ -5,8 +5,8 @@ import java.io.Serializable;
  */
 public class NamedPlace extends Place implements Serializable{
 
-    public NamedPlace(String name, Position p) {
-        super(name, p);
+    public NamedPlace(String name, Position p, String category) {
+        super(name, p, category);
     }
 
     public String toString() {

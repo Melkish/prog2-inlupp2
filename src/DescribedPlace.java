@@ -7,8 +7,8 @@ public class DescribedPlace extends Place implements Serializable{
 
     String description;
 
-    public DescribedPlace(String name, Position p, String description){
-        super(name, p);
+    public DescribedPlace(String name, Position p, String description, String category){
+        super(name, p, category);
         this.description = description;
     }
 

@@ -6,14 +6,20 @@ import java.io.Serializable;
 public abstract class Place implements Serializable{
     private String name;
     private Position p;
+    private String category;
     private boolean hidden = false;
 
-    public Place(String name, Position p) {
+    public Place(String name, Position p, String category) {
         this.name =  name;
         this.p = p;
+        this.category = category;
     }
     public String getName() {
         return this.name;
+    }
+
+    public String getCategory() {
+        return this.category;
     }
 
     public void hideHidden() {
